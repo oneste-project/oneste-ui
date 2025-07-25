@@ -144,20 +144,20 @@ export function DebateCard({ debate }: DebateCardProps) {
 
   return (
     <div key={debate.id} className="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl shadow-3xl border border-gray-700 transform hover:scale-105 hover:border-blue-500 hover:shadow-blue-500/50 transition-all duration-300">
-      <h3 className="text-3xl font-semibold mb-4 text-blue-300">{debate.title}</h3>
-      <p className="text-gray-300 mb-4" data-tooltip-id="gamelike-tooltip" data-tooltip-content="The total amount of Tezos (XTZ) currently staked on this debate.">Staked: {debate.stakedAmount} XTZ</p>
-      <div className="flex flex-col space-y-2">
+      <h3 className="text-2xl sm:text-3xl font-semibold mb-2 sm:mb-4 text-blue-300">{debate.title}</h3>
+      <p className="text-gray-300 mb-3 text-sm sm:text-base" data-tooltip-id="gamelike-tooltip" data-tooltip-content="The total amount of Tezos (XTZ) currently staked on this debate.">Staked: {debate.stakedAmount} XTZ</p>
+      <div className="flex flex-col space-y-2 sm:space-y-3">
         {debate.options.map((voteOption, index) => (
           <button key={index} 
             onClick={() => handleVote(index)}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all duration-300"
+            className="px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full text-sm sm:text-base transition-all duration-300"
             disabled={isVoting && votingOptionIndex === index}
           >
             {(isVoting && votingOptionIndex === index) ? 'Voting...' : `Vote ${voteOption}`}
           </button>
         ))}
       </div>
-      <div className="mt-4 flex items-center space-x-2">
+      <div className="mt-4 flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
         <input
           type="number"
           placeholder="Stake XTZ"
@@ -165,11 +165,11 @@ export function DebateCard({ debate }: DebateCardProps) {
           data-tooltip-content="Enter the amount of Tezos (XTZ) you wish to stake on this debate."
           value={stakeAmount || ''}
           onChange={(e) => handleStakeAmountChange(e.target.value)}
-          className="w-full px-4 py-2 rounded-full bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 rounded-full bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
         />
         <button
           onClick={handleStake}
-          className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full transition-all duration-300"
+          className="px-4 py-2 sm:px-6 sm:py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full text-sm sm:text-base transition-all duration-300"
           disabled={isStaking || isConfirmingStake}
         >
           {(isStaking || isConfirmingStake) ? 'Staking...' : 'Stake'}
