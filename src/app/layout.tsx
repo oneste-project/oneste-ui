@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import { Tooltip } from 'react-tooltip';
 
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -50,6 +51,7 @@ export default function RootLayout({
           <QueryClientProvider client={queryClient}>
             {children}
             <ToastContainer position="bottom-right" theme="dark" />
+            <Tooltip id="gamelike-tooltip" className="z-50 !bg-gray-800 !text-white !border !border-blue-500 !rounded-lg !shadow-lg !px-3 !py-2 !text-sm !font-mono" />
           </QueryClientProvider>
         </WagmiProvider>
       </body>

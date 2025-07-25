@@ -23,6 +23,7 @@ export function RewardDisplay() {
     xtz: 0.00,
     points: 0,
   });
+  const [claimToastId, setClaimToastId] = useState<string | null>(null);
 
   // TODO: Implement logic to fetch actual user rewards from smart contract or indexer
   // For now, using mock data
@@ -35,12 +36,20 @@ export function RewardDisplay() {
     });
 
   useEffect(() => {
+    if (isPending) {
+      const id = toast.info('Claim transaction pending... ⏳', { autoClose: false, closeButton: false });
+      setClaimToastId(id as string);
+    } else if (claimToastId) {
+      toast.dismiss(claimToastId);
+      setClaimToastId(null);
+    }
+
     if (isConfirmed) {
       toast.success('Rewards claimed successfully! 💰');
     } else if (error) {
       toast.error(`Claim Error: ${error.shortMessage || error.message} 🛑`);
     }
-  }, [isConfirmed, error]);
+  }, [isPending, isConfirmed, error]);
 
   const handleClaimRewards = () => {
     try {
@@ -60,8 +69,8 @@ export function RewardDisplay() {
         Your Rewards
       </h2>
       <div className="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl shadow-2xl border border-gray-700 inline-block">
-        <p className="text-3xl font-semibold mb-4 text-white">XTZ: {userRewards.xtz.toFixed(2)}</p>
-        <p className="text-3xl font-semibold mb-6 text-white">Points: {userRewards.points}</p>
+        <p className="text-3xl font-semibold mb-4 text-white" data-tooltip-id="gamelike-tooltip" data-tooltip-content="Your earned Tezos (XTZ) rewards from winning debates.">XTZ: {userRewards.xtz.toFixed(2)}</p>
+        <p className="text-3xl font-semibold mb-6 text-white" data-tooltip-id="gamelike-tooltip" data-tooltip-content="Your accumulated in-game points from participating in debates and voting.">Points: {userRewards.points}</p>
         <button
           onClick={handleClaimRewards}
           className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xl font-bold rounded-full shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-50"

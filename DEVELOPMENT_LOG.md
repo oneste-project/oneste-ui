@@ -52,17 +52,17 @@ Based on `readme-spec.md` and the current setup, here's the detailed plan to com
 ### Phase 4: Reward Display & Claiming UI
 - **Objective:** Show earned rewards and provide a mechanism to claim them.
 - **Actions:
-    - Create a section to display the user's current XTZ rewards and in-game points.
-    - Implement a "Claim Rewards" button.
-    - Implement the claiming logic: Call the reward claiming function on the smart contract, handling transaction signing and confirmation.
+    - Created `src/components/RewardDisplay.tsx` to display mock reward data.
+    - Integrated `RewardDisplay` into `src/app/page.tsx`.
+    - Implemented placeholder claiming logic using `useWriteContract`.
 
 ### Phase 5: Design Refinements & User Experience
 - **Objective:** Enhance the visual appeal, mobile-friendliness, and clarity for non-technical players.
 - **Actions:
+    - Added clear visual feedback for blockchain interactions (loading spinners for pending transactions, success/failure notifications) using `react-toastify`.
+    - Implemented gamelike tooltips for blockchain-specific terms using `react-tooltip`.
     - Refine the existing Tailwind CSS to align with a "clean, game-themed aesthetic." This includes typography, color palettes, and component styling.
     - Ensure all UI components are responsive and mobile-friendly.
-    - Add clear visual feedback for blockchain interactions (e.g., loading spinners for pending transactions, success/failure notifications).
-    - Implement tooltips or simple explanations for blockchain-specific terms (e.g., "gas fees," "staking").
 
 ### Phase 6: Error Handling & Testing Considerations
 - **Objective:** Implement robust error handling and provide guidance for testing.

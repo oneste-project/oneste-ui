@@ -57,6 +57,8 @@ interface DebateCardProps {
 export function DebateCard({ debate }: DebateCardProps) {
   const [stakeAmount, setStakeAmount] = useState<number>(0);
   const [votingOptionIndex, setVotingOptionIndex] = useState<number | null>(null);
+  const [stakeToastId, setStakeToastId] = useState<string | null>(null);
+  const [voteToastId, setVoteToastId] = useState<string | null>(null);
 
   const { writeContract: writeStake, data: stakeHash, isPending: isStaking, error: stakeError } = useWriteContract();
   const { writeContract: writeVote, data: voteHash, isPending: isVoting, error: voteError } = useWriteContract();
@@ -72,20 +74,36 @@ export function DebateCard({ debate }: DebateCardProps) {
     });
 
   useEffect(() => {
+    if (isStaking) {
+      const id = toast.info('Staking transaction pending... ⏳', { autoClose: false, closeButton: false });
+      setStakeToastId(id as string);
+    } else if (stakeToastId) {
+      toast.dismiss(stakeToastId);
+      setStakeToastId(null);
+    }
+
     if (isConfirmedStake) {
       toast.success('Stake transaction confirmed! 🎉');
     } else if (stakeError) {
       toast.error(`Stake Error: ${stakeError.shortMessage || stakeError.message} ❌`);
     }
-  }, [isConfirmedStake, stakeError]);
+  }, [isStaking, isConfirmedStake, stakeError]);
 
   useEffect(() => {
+    if (isVoting) {
+      const id = toast.info('Vote transaction pending... ⏳', { autoClose: false, closeButton: false });
+      setVoteToastId(id as string);
+    } else if (voteToastId) {
+      toast.dismiss(voteToastId);
+      setVoteToastId(null);
+    }
+
     if (isConfirmedVote) {
       toast.success('Vote transaction confirmed! ✅');
     } else if (voteError) {
       toast.error(`Vote Error: ${voteError.shortMessage || voteError.message} 🛑`);
     }
-  }, [isConfirmedVote, voteError]);
+  }, [isVoting, isConfirmedVote, voteError]);
 
   const handleStakeAmountChange = (amount: string) => {
     setStakeAmount(parseFloat(amount) || 0);
@@ -127,7 +145,7 @@ export function DebateCard({ debate }: DebateCardProps) {
   return (
     <div key={debate.id} className="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl shadow-2xl border border-gray-700 transform hover:scale-105 transition-transform duration-300">
       <h3 className="text-3xl font-semibold mb-4 text-blue-300">{debate.title}</h3>
-      <p className="text-gray-300 mb-4">Staked: {debate.stakedAmount} XTZ</p>
+      <p className="text-gray-300 mb-4" data-tooltip-id="gamelike-tooltip" data-tooltip-content="The total amount of Tezos (XTZ) currently staked on this debate.">Staked: {debate.stakedAmount} XTZ</p>
       <div className="flex flex-col space-y-2">
         {debate.options.map((voteOption, index) => (
           <button key={index} 
@@ -143,6 +161,8 @@ export function DebateCard({ debate }: DebateCardProps) {
         <input
           type="number"
           placeholder="Stake XTZ"
+          data-tooltip-id="gamelike-tooltip"
+          data-tooltip-content="Enter the amount of Tezos (XTZ) you wish to stake on this debate."
           value={stakeAmount || ''}
           onChange={(e) => handleStakeAmountChange(e.target.value)}
           className="w-full px-4 py-2 rounded-full bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
