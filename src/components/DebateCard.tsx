@@ -143,7 +143,7 @@ export function DebateCard({ debate }: DebateCardProps) {
   };
 
   return (
-    <div key={debate.id} className="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl shadow-2xl border border-gray-700 transform hover:scale-105 transition-transform duration-300">
+    <div key={debate.id} className="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl shadow-3xl border border-gray-700 transform hover:scale-105 hover:border-blue-500 hover:shadow-blue-500/50 transition-all duration-300">
       <h3 className="text-3xl font-semibold mb-4 text-blue-300">{debate.title}</h3>
       <p className="text-gray-300 mb-4" data-tooltip-id="gamelike-tooltip" data-tooltip-content="The total amount of Tezos (XTZ) currently staked on this debate.">Staked: {debate.stakedAmount} XTZ</p>
       <div className="flex flex-col space-y-2">

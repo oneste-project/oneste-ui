@@ -28,6 +28,12 @@ const mockDebates: Debate[] = [
     options: ['Yes', 'No'],
     stakedAmount: 120,
   },
+  {
+    id: 4,
+    title: 'Who is the next president of the United States?',
+    options: ['Elon', 'Trump'],
+    stakedAmount: 200,
+  },
 ];
 
 export function DebateList() {
