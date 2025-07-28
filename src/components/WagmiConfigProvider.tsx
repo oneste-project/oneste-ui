@@ -25,7 +25,6 @@ export function WagmiConfigProvider({ children }: { children: ReactNode }) {
       console.error('CRITICAL: NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY is not defined. Web3 functionality will be disabled.');
       return;
     }
-    console.log('NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY:', projectAccessKey);
 
     const wagmiConfig = createConfig({
       chains: [etherlinkTestnet],
