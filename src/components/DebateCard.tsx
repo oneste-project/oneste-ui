@@ -6,7 +6,7 @@ import { parseEther } from 'viem';
 import { toast } from 'react-toastify';
 
 // Placeholder for your deployed smart contract address
-const contractAddress = '0x6FC7EdF0B850c804e7832e64f8Ea0B0d516c024C'; 
+const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
 
 // Placeholder for your smart contract ABI (simplified for staking function)
 const contractAbi = [

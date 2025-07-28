@@ -9,6 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@0xsequence/network": "^2.3.23",
+    "@0xsequence/provider": "^2.3.23",
+    "@0xsequence/wagmi-connector": "^4.0.1",
+    "@0xsequence/wallet": "^2.3.23",
     "@tanstack/react-query": "^5.83.0",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.8.1",

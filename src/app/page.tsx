@@ -7,6 +7,7 @@ import { loadSlim } from '@tsparticles/slim'; // loads tsparticles slim
 import { ConnectWallet } from '@/components/ConnectWallet';
 import { DebateList } from '@/components/DebateList';
 import { RewardDisplay } from '@/components/RewardDisplay';
+import { CreateDebate } from '@/components/CreateDebate';
 
 export default function Home() {
   const [init, setInit] = useState(false);
@@ -155,6 +156,8 @@ export default function Home() {
         <DebateList />
 
         <RewardDisplay />
+
+        <CreateDebate />
       </main>
 
       <footer className="relative z-10 mt-16 sm:mt-20 py-6 sm:py-8 text-gray-500 text-xs sm:text-sm text-center">
