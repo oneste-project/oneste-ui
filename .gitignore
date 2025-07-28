@@ -1,5 +1,2 @@
-.env.local
-node_modules
-DEVELOPMENT_LOG.md
-DETAILED_SPEC.md
-readme-spec.md
+# Next.js build output
+.next/

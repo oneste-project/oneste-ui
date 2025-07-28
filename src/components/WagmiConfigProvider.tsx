@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { sequenceWallet } from '@0xsequence/wagmi-connector';
@@ -15,29 +15,40 @@ const etherlinkTestnet = {
 
 const queryClient = new QueryClient();
 
-const projectAccessKey = process.env.NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY;
-
-if (!projectAccessKey) {
-  console.error('CRITICAL: NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY is not defined. Web3 functionality will be disabled.');
-}
-
-const config = createConfig({
-  chains: [etherlinkTestnet],
-  connectors: [
-    sequenceWallet({
-      connectOptions: {
-        app: 'Oneste',
-        projectAccessKey: projectAccessKey!,
-      },
-      defaultNetwork: etherlinkTestnet.id,
-    }),
-  ],
-  transports: {
-    [etherlinkTestnet.id]: http(),
-  },
-});
-
 export function WagmiConfigProvider({ children }: { children: ReactNode }) {
+  const [config, setConfig] = useState<any>(null);
+
+  useEffect(() => {
+    const projectAccessKey = process.env.NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY;
+
+    if (!projectAccessKey) {
+      console.error('CRITICAL: NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY is not defined. Web3 functionality will be disabled.');
+      return;
+    }
+    console.log('NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY:', projectAccessKey);
+
+    const wagmiConfig = createConfig({
+      chains: [etherlinkTestnet],
+      connectors: [
+        sequenceWallet({
+          connectOptions: {
+            app: 'Oneste',
+            projectAccessKey: projectAccessKey!,
+          },
+          defaultNetwork: etherlinkTestnet.id,
+        }),
+      ],
+      transports: {
+        [etherlinkTestnet.id]: http(),
+      },
+    });
+    setConfig(wagmiConfig);
+  }, []);
+
+  if (!config) {
+    return null; // Or a loading spinner while config is being created
+  }
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
