@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { type Container, type ISourceOptions } from '@tsparticles/engine';
 import { loadSlim } from '@tsparticles/slim'; // loads tsparticles slim
@@ -9,8 +9,46 @@ import { DebateList } from '@/components/DebateList';
 import { RewardDisplay } from '@/components/RewardDisplay';
 import { CreateDebate } from '@/components/CreateDebate';
 
+interface Debate {
+  id: number;
+  title: string;
+  options: string[];
+  stakedAmount: number;
+}
+
+const initialMockDebates: Debate[] = [
+  {
+    id: 1,
+    title: 'Should we add a new map?',
+    options: ['Yes', 'No'],
+    stakedAmount: 100,
+  },
+  {
+    id: 2,
+    title: 'Should we introduce a new character?',
+    options: ['Yes', 'No'],
+    stakedAmount: 75,
+  },
+];
+
 export default function Home() {
   const [init, setInit] = useState(false);
+  const [debates, setDebates] = useState<Debate[]>([]);
+
+  // Load debates from local storage on initial mount
+  useEffect(() => {
+    const storedDebates = JSON.parse(localStorage.getItem('createdDebates') || '[]');
+    setDebates([...initialMockDebates, ...storedDebates]);
+  }, []);
+
+  // Callback to add a new debate and update local storage
+  const handleDebateCreated = useCallback((newDebate: Debate) => {
+    setDebates((prevDebates) => {
+      const updatedDebates = [...prevDebates, newDebate];
+      localStorage.setItem('createdDebates', JSON.stringify(updatedDebates.filter(d => d.id > 1000000000000))); // Only store dynamically created debates
+      return updatedDebates;
+    });
+  }, []);
 
   // this should be run only once per application lifetime
   useEffect(() => {
@@ -153,11 +191,11 @@ export default function Home() {
           Join the Debate
         </button>
 
-        <DebateList />
+        <DebateList debates={debates} />
 
         <RewardDisplay />
 
-        <CreateDebate />
+        <CreateDebate onDebateCreated={handleDebateCreated} />
       </main>
 
       <footer className="relative z-10 mt-16 sm:mt-20 py-6 sm:py-8 text-gray-500 text-xs sm:text-sm text-center">

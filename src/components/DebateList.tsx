@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { DebateCard } from './DebateCard';
 
 interface Debate {
@@ -9,7 +10,7 @@ interface Debate {
   stakedAmount: number;
 }
 
-const mockDebates: Debate[] = [
+const initialMockDebates: Debate[] = [
   {
     id: 1,
     title: 'Should we add a new map?',
@@ -22,28 +23,20 @@ const mockDebates: Debate[] = [
     options: ['Yes', 'No'],
     stakedAmount: 75,
   },
-  {
-    id: 3,
-    title: 'Should we implement a new game mode?',
-    options: ['Yes', 'No'],
-    stakedAmount: 120,
-  },
-  {
-    id: 4,
-    title: 'Who is the next president of the United States?',
-    options: ['Elon', 'Trump'],
-    stakedAmount: 200,
-  },
 ];
 
-export function DebateList() {
+interface DebateListProps {
+  debates: Debate[];
+}
+
+export function DebateList({ debates }: DebateListProps) {
   return (
     <section className="mt-20 w-full max-w-4xl mx-auto">
       <h2 className="text-5xl font-bold mb-12 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500 text-center">
         Active Debates
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {mockDebates.map((debate) => (
+        {debates.map((debate) => (
           <DebateCard key={debate.id} debate={debate} />
         ))}
       </div>

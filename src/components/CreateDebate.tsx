@@ -13,14 +13,19 @@ const contractAbi = [
   {
     "inputs": [
       {
-        "internalType": "string",
-        "name": "_title",
-        "type": "string"
+        "internalType": "uint256",
+        "name": "debateId",
+        "type": "uint256"
       },
       {
-        "internalType": "string[]",
-        "name": "_options",
-        "type": "string[]"
+        "internalType": "uint256[]",
+        "name": "proposalIds",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minVoteAmount",
+        "type": "uint256"
       }
     ],
     "name": "createDebate",
@@ -30,11 +35,13 @@ const contractAbi = [
   }
 ];
 
-export function CreateDebate() {
+export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: Debate) => void }) {
   const [title, setTitle] = useState('');
   const [options, setOptions] = useState(''); // Comma-separated options
   const [rewardPool, setRewardPool] = useState<number>(0); // This will be the value sent with the transaction
   const [minVoteAmount, setMinVoteAmount] = useState<number>(0); // New state for minVoteAmount
+  const [currentDebateId, setCurrentDebateId] = useState<number | null>(null); // New state to store the generated debateId
+  const [currentOptionsArray, setCurrentOptionsArray] = useState<string[]>([]); // New state to store the processed options array
   const platformFee = 0.1; // 0.1 XTZ platform fee
   const amountForVoters = Math.max(0, rewardPool - platformFee);
 
@@ -57,9 +64,23 @@ export function CreateDebate() {
 
     if (isConfirmed) {
       toast.success('Debate created successfully! 🎉');
+      // Save debate details to local storage
+      const newDebate = {
+        id: currentDebateId, // Use the generated debateId from state
+        title: title,
+        options: currentOptionsArray, // Use the processed options array from state
+        stakedAmount: 0, // Initial staked amount is 0
+      };
+      const existingDebates = JSON.parse(localStorage.getItem('createdDebates') || '[]');
+      existingDebates.push(newDebate);
+      localStorage.setItem('createdDebates', JSON.stringify(existingDebates));
+      onDebateCreated(newDebate); // Notify parent component
+
       setTitle('');
       setOptions('');
       setRewardPool(0);
+      setCurrentDebateId(null); // Clear the currentDebateId after use
+      setCurrentOptionsArray([]); // Clear the currentOptionsArray after use
     } else if (error) {
       console.error("Error creating debate:", error);
       toast.error(`Error creating debate: ${error.shortMessage || error.message} ❌`);
@@ -79,6 +100,7 @@ export function CreateDebate() {
     }
 
     const optionsArray = options.split(',').map(opt => opt.trim());
+    setCurrentOptionsArray(optionsArray); // Store the processed options array in state
     if (optionsArray.length === 0 || optionsArray.some(opt => opt === '')) {
       toast.error('Please provide valid comma-separated options. 🛑');
       return;
@@ -86,23 +108,24 @@ export function CreateDebate() {
 
     // Generate a unique debateId (for simplicity, using current timestamp)
     const debateId = Date.now();
+    setCurrentDebateId(debateId); // Store the generated debateId in state
 
     // Convert string options to numerical proposalIds (using index as ID)
     const proposalIds = optionsArray.map((_, index) => BigInt(index + 1)); // Start from 1 to avoid 0
 
     // Ensure the value sent is at least the platform fee
-    const valueToSend = parseEther(rewardPool.toString());
-    if (valueToSend < parseEther(platformFee.toString())) {
-      toast.error(`Reward pool must be at least ${platformFee} XTZ to cover platform fee. 🛑`);
-      return;
-    }
+    const valueToSend = 0n; // Temporarily set to 0 for testing without XTZ
+    // if (valueToSend < parseEther(platformFee.toString())) {
+    //   toast.error(`Reward pool must be at least ${platformFee} XTZ to cover platform fee. 🛑`);
+    //   return;
+    // }
 
     try {
       writeContract({
         address: contractAddress,
         abi: contractAbi,
         functionName: 'createDebate',
-        args: [BigInt(debateId), proposalIds, BigInt(minVoteAmount)],
+        args: [BigInt(debateId), proposalIds, parseEther(minVoteAmount.toString())],
         value: valueToSend,
       });
     } catch (err) {
