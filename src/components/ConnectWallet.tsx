@@ -5,16 +5,18 @@ import { formatUnits } from 'viem';
 
 export function ConnectWallet() {
   const { connect, connectors, isPending } = useConnect({
-    onSuccess(data) {
-      console.log('Connect Success:', data);
-    },
-    onError(error) {
-      console.error('Connect Error:', error);
+    mutation: {
+      onSuccess(data) {
+        console.log('Connect Success:', data);
+      },
+      onError(error) {
+        console.error('Connect Error:', error);
+      },
     },
   });
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
-  const { data: balance } = useBalance({ address, watch: true });
+  const { data: balance } = useBalance({ address });
 
   const formattedBalance = balance ? formatUnits(balance.value, balance.decimals) : '0';
 

@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { sequenceWallet } from '@0xsequence/wagmi-connector';
-import { injected } from 'wagmi/connectors';
+
 
 const etherlinkTestnet = {
   id: 128123,

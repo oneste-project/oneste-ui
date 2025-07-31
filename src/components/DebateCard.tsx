@@ -87,7 +87,7 @@ export function DebateCard({ debate }: DebateCardProps) {
     if (isConfirmedStake) {
       toast.success('Stake transaction confirmed! 🎉');
     } else if (stakeError) {
-      toast.error(`Stake Error: ${(stakeError as any)?.shortMessage || (stakeError as any).message} ❌`);
+      toast.error(`Stake Error: ${(stakeError as Error & { shortMessage?: string })?.shortMessage || stakeError.message} ❌`);
     }
   }, [isConfirmedStake, stakeError]);
 
@@ -110,7 +110,7 @@ export function DebateCard({ debate }: DebateCardProps) {
       setUserVotedOptionIndex(votingOptionIndex);
       setShowVoteConfirmation(true);
     } else if (voteError) {
-      toast.error(`Vote Error: ${(voteError as any)?.shortMessage || (voteError as any).message} 🛑`);
+      toast.error(`Vote Error: ${(voteError as Error & { shortMessage?: string })?.shortMessage || voteError.message} 🛑`);
     }
   }, [isConfirmedVote, voteError, votingOptionIndex]);
 
