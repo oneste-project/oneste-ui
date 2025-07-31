@@ -4,7 +4,14 @@ import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 
 export function ConnectWallet() {
-  const { connect, connectors, isPending } = useConnect();
+  const { connect, connectors, isPending } = useConnect({
+    onSuccess(data) {
+      console.log('Connect Success:', data);
+    },
+    onError(error) {
+      console.error('Connect Error:', error);
+    },
+  });
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
   const { data: balance } = useBalance({ address, watch: true });
@@ -12,15 +19,20 @@ export function ConnectWallet() {
   const formattedBalance = balance ? formatUnits(balance.value, balance.decimals) : '0';
 
   const handleConnect = () => {
-    // Find the specific MetaMask connector using its unique ID
-    const metaMaskConnector = connectors.find(c => c.id === 'io.metamask');
-
-    if (metaMaskConnector) {
-      connect({ connector: metaMaskConnector });
+    const sequenceConnector = connectors.find(c => c.id === 'sequence');
+    console.log('Attempting to connect with Sequence connector:', sequenceConnector);
+    if (sequenceConnector) {
+      connect({ connector: sequenceConnector });
     } else {
-      // Fallback for users who might not have MetaMask
-      alert("MetaMask not found. Please install the MetaMask extension.");
-      console.error("MetaMask connector not found.");
+      console.warn('Sequence connector not found. Falling back to MetaMask.');
+      // Fallback to MetaMask if Sequence is not available
+      const metaMaskConnector = connectors.find(c => c.id === 'io.metamask');
+      if (metaMaskConnector) {
+        connect({ connector: metaMaskConnector });
+      } else {
+        alert("No wallet found. Please install MetaMask or ensure Sequence is configured.");
+        console.error("No suitable connector found.");
+      }
     }
   };
 

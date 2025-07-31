@@ -23,7 +23,6 @@ if (!projectAccessKey) {
 const wagmiConfig = createConfig({
   chains: [etherlinkTestnet],
   connectors: [
-    injected(),
     sequenceWallet({
       connectOptions: {
         app: 'Oneste',
