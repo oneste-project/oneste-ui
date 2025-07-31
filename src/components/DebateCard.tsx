@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
 import { toast } from 'react-toastify';
+import { VoteConfirmationCard } from './VoteConfirmationCard';
 
 // Placeholder for your deployed smart contract address
 const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
@@ -57,8 +58,11 @@ interface DebateCardProps {
 export function DebateCard({ debate }: DebateCardProps) {
   const [stakeAmount, setStakeAmount] = useState<number>(0);
   const [votingOptionIndex, setVotingOptionIndex] = useState<number | null>(null);
+  const [hasVoted, setHasVoted] = useState<boolean>(false); // New state for voting indication
+  const [userVotedOptionIndex, setUserVotedOptionIndex] = useState<number | null>(null); // New state to store the voted option index
   const [stakeToastId, setStakeToastId] = useState<string | null>(null);
   const [voteToastId, setVoteToastId] = useState<string | null>(null);
+  const [showVoteConfirmation, setShowVoteConfirmation] = useState<boolean>(false);
 
   const { writeContract: writeStake, data: stakeHash, isPending: isStaking, error: stakeError } = useWriteContract();
   const { writeContract: writeVote, data: voteHash, isPending: isVoting, error: voteError } = useWriteContract();
@@ -100,6 +104,9 @@ export function DebateCard({ debate }: DebateCardProps) {
 
     if (isConfirmedVote) {
       toast.success('Vote transaction confirmed! ✅');
+      setHasVoted(true); // Set hasVoted to true on successful vote
+      setUserVotedOptionIndex(votingOptionIndex); // Store the voted option index
+      setShowVoteConfirmation(true); // Show the confirmation card
     } else if (voteError) {
       toast.error(`Vote Error: ${voteError.shortMessage || voteError.message} 🛑`);
     }
@@ -150,13 +157,30 @@ export function DebateCard({ debate }: DebateCardProps) {
         {debate.options.map((voteOption, index) => (
           <button key={index} 
             onClick={() => handleVote(index)}
-            className="px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full text-sm sm:text-base transition-all duration-300"
-            disabled={isVoting && votingOptionIndex === index}
+            className={`px-4 py-2 sm:px-6 sm:py-3 font-bold rounded-full text-sm sm:text-base transition-all duration-300
+              ${hasVoted 
+                ? (userVotedOptionIndex === index ? 'bg-green-600' : 'bg-gray-500 cursor-not-allowed') 
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            disabled={hasVoted || (isVoting && votingOptionIndex === index)}
           >
-            {(isVoting && votingOptionIndex === index) ? 'Voting...' : `Vote ${voteOption}`}
+            {hasVoted 
+              ? (userVotedOptionIndex === index ? 'Your Vote' : voteOption) 
+              : (isVoting && votingOptionIndex === index) ? 'Voting...' : `Vote ${voteOption}`
+            }
           </button>
         ))}
       </div>
+      {hasVoted && userVotedOptionIndex !== null && (
+        <p className="text-md text-green-400 mt-4">You voted for: {debate.options[userVotedOptionIndex]}</p>
+      )}
+      {showVoteConfirmation && userVotedOptionIndex !== null && (
+        <VoteConfirmationCard
+          debateTitle={debate.title}
+          votedOption={debate.options[userVotedOptionIndex]}
+          onClose={() => setShowVoteConfirmation(false)}
+        />
+      )}
       <div className="mt-4 flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
         <input
           type="number"

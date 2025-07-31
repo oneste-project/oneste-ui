@@ -33,7 +33,8 @@ const contractAbi = [
 export function CreateDebate() {
   const [title, setTitle] = useState('');
   const [options, setOptions] = useState(''); // Comma-separated options
-  const [rewardPool, setRewardPool] = useState<number>(0);
+  const [rewardPool, setRewardPool] = useState<number>(0); // This will be the value sent with the transaction
+  const [minVoteAmount, setMinVoteAmount] = useState<number>(0); // New state for minVoteAmount
   const platformFee = 0.1; // 0.1 XTZ platform fee
   const amountForVoters = Math.max(0, rewardPool - platformFee);
 
@@ -45,10 +46,13 @@ export function CreateDebate() {
     });
 
   useEffect(() => {
+    let toastId: string | number | null = null;
+
     if (isPending) {
-      toast.info('Creating debate... ⏳', { autoClose: false, closeButton: false });
-    } else if (hash) {
-      toast.dismiss();
+      toastId = toast.info('Creating debate... ⏳', { autoClose: false, closeButton: false });
+    } else if (toastId) {
+      toast.dismiss(toastId);
+      toastId = null;
     }
 
     if (isConfirmed) {
@@ -57,25 +61,49 @@ export function CreateDebate() {
       setOptions('');
       setRewardPool(0);
     } else if (error) {
+      console.error("Error creating debate:", error);
       toast.error(`Error creating debate: ${error.shortMessage || error.message} ❌`);
     }
+
+    return () => {
+      if (toastId) {
+        toast.dismiss(toastId);
+      }
+    };
   }, [isPending, isConfirmed, error, hash]);
 
   const handleCreateDebate = () => {
-    if (!title || !options || rewardPool <= 0) {
-      toast.error('Please fill all fields and ensure reward pool is greater than 0. 🛑');
+    if (!title || !options || rewardPool <= 0 || minVoteAmount < 0) {
+      toast.error('Please fill all fields and ensure reward pool is greater than 0 and minimum vote amount is not negative. 🛑');
       return;
     }
 
     const optionsArray = options.split(',').map(opt => opt.trim());
+    if (optionsArray.length === 0 || optionsArray.some(opt => opt === '')) {
+      toast.error('Please provide valid comma-separated options. 🛑');
+      return;
+    }
+
+    // Generate a unique debateId (for simplicity, using current timestamp)
+    const debateId = Date.now();
+
+    // Convert string options to numerical proposalIds (using index as ID)
+    const proposalIds = optionsArray.map((_, index) => BigInt(index + 1)); // Start from 1 to avoid 0
+
+    // Ensure the value sent is at least the platform fee
+    const valueToSend = parseEther(rewardPool.toString());
+    if (valueToSend < parseEther(platformFee.toString())) {
+      toast.error(`Reward pool must be at least ${platformFee} XTZ to cover platform fee. 🛑`);
+      return;
+    }
 
     try {
       writeContract({
         address: contractAddress,
         abi: contractAbi,
         functionName: 'createDebate',
-        args: [title, optionsArray],
-        value: parseEther(rewardPool.toString()), // Send the full reward pool amount
+        args: [BigInt(debateId), proposalIds, BigInt(minVoteAmount)],
+        value: valueToSend,
       });
     } catch (err) {
       console.error("Error preparing create debate transaction:", err);
@@ -122,6 +150,18 @@ export function CreateDebate() {
           />
           <p className="text-sm text-gray-400 mt-2">Platform Fee: {platformFee} XTZ (0.1 XTZ deducted)</p>
           <p className="text-sm text-gray-400">Amount for Voters: {amountForVoters.toFixed(2)} XTZ</p>
+        </div>
+        <div className="mb-6">
+          <label htmlFor="minVoteAmount" className="block text-gray-300 text-lg font-semibold mb-2">Minimum Vote Amount (XTZ)</label>
+          <input
+            type="number"
+            id="minVoteAmount"
+            value={minVoteAmount || ''}
+            onChange={(e) => setMinVoteAmount(parseFloat(e.target.value) || 0)}
+            className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., 0.1"
+          />
+          <p className="text-sm text-gray-400 mt-2">Minimum amount required to vote in this debate.</p>
         </div>
         <button
           onClick={handleCreateDebate}
