@@ -1,15 +1,14 @@
 'use client';
 
 import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi';
-import { formatUnits } from 'viem'; // Import the formatUnits function
+import { formatUnits } from 'viem';
 
 export function ConnectWallet() {
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
-  const { data: balance } = useBalance({ address });
+  const { data: balance } = useBalance({ address, watch: true });
 
-  // Format the balance to a higher precision
   const formattedBalance = balance ? formatUnits(balance.value, balance.decimals) : '0';
 
   const handleConnect = () => {
@@ -18,11 +17,30 @@ export function ConnectWallet() {
       connect({ connector: sequenceConnector });
     } else {
       console.error("Sequence connector not found. Please ensure it's configured in wagmi.");
-      // Fallback to the first available connector if Sequence is not found
       if (connectors.length > 0) {
         connect({ connector: connectors[0] });
       }
     }
+  };
+
+  const handleDisconnect = () => {
+    disconnect(undefined, {
+      onSuccess: () => {
+        // More aggressively clear all sequence-related storage
+        Object.keys(localStorage).forEach(key => {
+          if (key.toLowerCase().includes('sequence')) {
+            localStorage.removeItem(key);
+          }
+        });
+        Object.keys(sessionStorage).forEach(key => {
+          if (key.toLowerCase().includes('sequence')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+        // Reload the page to ensure a clean state
+        window.location.reload();
+      }
+    });
   };
 
   if (isConnected) {
@@ -33,7 +51,7 @@ export function ConnectWallet() {
           <p className="text-md text-gray-300">Balance: {Number(formattedBalance).toFixed(4)} {balance.symbol}</p>
         )}
         <button
-          onClick={() => disconnect()}
+          onClick={handleDisconnect}
           className="mt-4 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50"
         >
           Disconnect
