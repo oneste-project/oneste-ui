@@ -12,35 +12,20 @@ export function ConnectWallet() {
   const formattedBalance = balance ? formatUnits(balance.value, balance.decimals) : '0';
 
   const handleConnect = () => {
-    const sequenceConnector = connectors.find(c => c.id === 'sequence');
-    if (sequenceConnector) {
-      connect({ connector: sequenceConnector });
+    // Find the specific MetaMask connector using its unique ID
+    const metaMaskConnector = connectors.find(c => c.id === 'io.metamask');
+
+    if (metaMaskConnector) {
+      connect({ connector: metaMaskConnector });
     } else {
-      console.error("Sequence connector not found. Please ensure it's configured in wagmi.");
-      if (connectors.length > 0) {
-        connect({ connector: connectors[0] });
-      }
+      // Fallback for users who might not have MetaMask
+      alert("MetaMask not found. Please install the MetaMask extension.");
+      console.error("MetaMask connector not found.");
     }
   };
 
   const handleDisconnect = () => {
-    disconnect(undefined, {
-      onSuccess: () => {
-        // More aggressively clear all sequence-related storage
-        Object.keys(localStorage).forEach(key => {
-          if (key.toLowerCase().includes('sequence')) {
-            localStorage.removeItem(key);
-          }
-        });
-        Object.keys(sessionStorage).forEach(key => {
-          if (key.toLowerCase().includes('sequence')) {
-            sessionStorage.removeItem(key);
-          }
-        });
-        // Reload the page to ensure a clean state
-        window.location.reload();
-      }
-    });
+    disconnect();
   };
 
   if (isConnected) {
