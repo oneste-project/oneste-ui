@@ -4,6 +4,8 @@
 node_modules/
 oneste-voting-contract/
 
+.DS_Store
+
 # Documentation and logs
 DETAILED_SPEC.md
 DEVELOPMENT_LOG.md

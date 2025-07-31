@@ -53,58 +53,66 @@ export function DebateCard({ debate }: DebateCardProps) {
   const [stakeAmount, setStakeAmount] = useState<number>(0);
   const [votingOptionIndex, setVotingOptionIndex] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState<boolean>(false); // New state for voting indication
-  const [userVotedOptionIndex, setUserVotedOptionIndex] = useState<number | null>(null); // New state to store the voted option index
-  const [stakeToastId, setStakeToastId] = useState<string | null>(null);
-  const [voteToastId, setVoteToastId] = useState<string | null>(null);
+  const [userVotedOptionIndex, setUserVotedOptionIndex] = useState<number | null>(null);
   const [showVoteConfirmation, setShowVoteConfirmation] = useState<boolean>(false);
 
   const { writeContract: writeStake, data: stakeHash, isPending: isStaking, error: stakeError } = useWriteContract();
   const { writeContract: writeVote, data: voteHash, isPending: isVoting, error: voteError } = useWriteContract();
 
-  const { isLoading: isConfirmingStake, isSuccess: isConfirmedStake } = 
+  const { isLoading: isConfirmingStake, isSuccess: isConfirmedStake } =
     useWaitForTransactionReceipt({
       hash: stakeHash,
     });
 
-  const { isSuccess: isConfirmedVote } = 
+  const { isSuccess: isConfirmedVote } =
     useWaitForTransactionReceipt({
       hash: voteHash,
     });
 
-  useEffect(() => {
-    if (isStaking) {
-      const id = toast.info('Staking transaction pending... ⏳', { autoClose: false, closeButton: false });
-      setStakeToastId(id as string);
-    } else if (stakeToastId) {
-      toast.dismiss(stakeToastId);
-      setStakeToastId(null);
-    }
+  // --- Refactored useEffect hooks to prevent infinite loops ---
 
+  // Effect for handling staking notifications
+  useEffect(() => {
+    let toastId: string | number;
+    if (isStaking) {
+      toastId = toast.info('Staking transaction pending... ⏳', { autoClose: false, closeButton: false });
+    }
+    // Cleanup function to dismiss toast when staking is no longer pending
+    return () => {
+      if (toastId) toast.dismiss(toastId);
+    };
+  }, [isStaking]);
+
+  useEffect(() => {
     if (isConfirmedStake) {
       toast.success('Stake transaction confirmed! 🎉');
     } else if (stakeError) {
-      toast.error(`Stake Error: ${(stakeError as any)?.shortMessage || (stakeError as any).message} ❌`); // eslint-disable-line @typescript-eslint/no-explicit-any
+      toast.error(`Stake Error: ${(stakeError as any)?.shortMessage || (stakeError as any).message} ❌`);
     }
-  }, [isStaking, isConfirmedStake, stakeError, stakeToastId]);
+  }, [isConfirmedStake, stakeError]);
+
+  // Effect for handling voting notifications
+  useEffect(() => {
+    let toastId: string | number;
+    if (isVoting) {
+      toastId = toast.info('Vote transaction pending... ⏳', { autoClose: false, closeButton: false });
+    }
+    // Cleanup function to dismiss toast when voting is no longer pending
+    return () => {
+      if (toastId) toast.dismiss(toastId);
+    };
+  }, [isVoting]);
 
   useEffect(() => {
-    if (isVoting) {
-      const id = toast.info('Vote transaction pending... ⏳', { autoClose: false, closeButton: false });
-      setVoteToastId(id as string);
-    } else if (voteToastId) {
-      toast.dismiss(voteToastId);
-      setVoteToastId(null);
-    }
-
     if (isConfirmedVote) {
       toast.success('Vote transaction confirmed! ✅');
-      setHasVoted(true); // Set hasVoted to true on successful vote
-      setUserVotedOptionIndex(votingOptionIndex); // Store the voted option index
-      setShowVoteConfirmation(true); // Show the confirmation card
+      setHasVoted(true);
+      setUserVotedOptionIndex(votingOptionIndex);
+      setShowVoteConfirmation(true);
     } else if (voteError) {
-      toast.error(`Vote Error: ${(voteError as any)?.shortMessage || (voteError as any).message} 🛑`); // eslint-disable-line @typescript-eslint/no-explicit-any
+      toast.error(`Vote Error: ${(voteError as any)?.shortMessage || (voteError as any).message} 🛑`);
     }
-  }, [isVoting, isConfirmedVote, voteError, voteToastId, votingOptionIndex]);
+  }, [isConfirmedVote, voteError, votingOptionIndex]);
 
   const handleStakeAmountChange = (amount: string) => {
     setStakeAmount(parseFloat(amount) || 0);

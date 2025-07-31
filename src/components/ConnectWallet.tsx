@@ -1,13 +1,16 @@
 'use client';
 
 import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi';
+import { formatUnits } from 'viem'; // Import the formatUnits function
 
 export function ConnectWallet() {
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
-  console.log('ConnectWallet: Address', address, 'isConnected', isConnected);
   const { data: balance } = useBalance({ address });
+
+  // Format the balance to a higher precision
+  const formattedBalance = balance ? formatUnits(balance.value, balance.decimals) : '0';
 
   const handleConnect = () => {
     const sequenceConnector = connectors.find(c => c.id === 'sequence');
@@ -27,7 +30,7 @@ export function ConnectWallet() {
       <div className="flex flex-col items-center space-y-2">
         <p className="text-lg text-green-400">Connected: {address?.slice(0, 6)}...{address?.slice(-4)}</p>
         {balance && (
-          <p className="text-md text-gray-300">Balance: {balance.formatted} {balance.symbol}</p>
+          <p className="text-md text-gray-300">Balance: {Number(formattedBalance).toFixed(4)} {balance.symbol}</p>
         )}
         <button
           onClick={() => disconnect()}

@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { sequenceWallet } from '@0xsequence/wagmi-connector';
@@ -13,45 +13,38 @@ const etherlinkTestnet = {
   blockExplorers: { default: { name: 'Etherlink Explorer', url: 'https://explorer.etherlink.com' } },
 } as const;
 
-console.log('WagmiConfigProvider: Configured Chain ID', etherlinkTestnet.id);
+const projectAccessKey = process.env.NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY;
+
+if (!projectAccessKey) {
+  console.error('CRITICAL: NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY is not defined. Web3 functionality will be disabled.');
+}
+
+const wagmiConfig = createConfig({
+  chains: [etherlinkTestnet],
+  connectors: [
+    sequenceWallet({
+      connectOptions: {
+        app: 'Oneste',
+        projectAccessKey: projectAccessKey!,
+      },
+      defaultNetwork: etherlinkTestnet.id,
+    }),
+  ],
+  transports: {
+    [etherlinkTestnet.id]: http(),
+  },
+});
 
 const queryClient = new QueryClient();
 
 export function WagmiConfigProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<ReturnType<typeof createConfig> | null>(null);
-
-  useEffect(() => {
-    const projectAccessKey = process.env.NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY;
-
-    if (!projectAccessKey) {
-      console.error('CRITICAL: NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY is not defined. Web3 functionality will be disabled.');
-      return;
-    }
-
-    const wagmiConfig = createConfig({
-      chains: [etherlinkTestnet],
-      connectors: [
-        sequenceWallet({
-          connectOptions: {
-            app: 'Oneste',
-            projectAccessKey: projectAccessKey!,
-          },
-          defaultNetwork: etherlinkTestnet.id,
-        }),
-      ],
-      transports: {
-        [etherlinkTestnet.id]: http(),
-      },
-    });
-    setConfig(wagmiConfig);
-  }, []);
-
-  if (!config) {
-    return null; // Or a loading spinner while config is being created
+  if (!projectAccessKey) {
+    // Render children without WagmiProvider if the key is missing
+    return <>{children}</>;
   }
 
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         {children}
       </QueryClientProvider>
