@@ -1,12 +1,11 @@
 'use client';
 
-import { useAccount, useConnect, useDisconnect, useSwitchChain, useBalance } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi';
 
 export function ConnectWallet() {
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
-  const { switchChain } = useSwitchChain();
   const { data: balance } = useBalance({ address });
 
   const handleConnect = () => {

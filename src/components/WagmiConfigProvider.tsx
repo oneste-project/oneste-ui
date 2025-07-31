@@ -16,7 +16,7 @@ const etherlinkTestnet = {
 const queryClient = new QueryClient();
 
 export function WagmiConfigProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<any>(null);
+  const [config, setConfig] = useState<ReturnType<typeof createConfig> | null>(null);
 
   useEffect(() => {
     const projectAccessKey = process.env.NEXT_PUBLIC_SEQUENCE_PROJECT_ACCESS_KEY;

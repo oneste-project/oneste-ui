@@ -1,29 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { DebateCard } from './DebateCard';
-
-interface Debate {
-  id: number;
-  title: string;
-  options: string[];
-  stakedAmount: number;
-}
-
-const initialMockDebates: Debate[] = [
-  {
-    id: 1,
-    title: 'Should we add a new map?',
-    options: ['Yes', 'No'],
-    stakedAmount: 100,
-  },
-  {
-    id: 2,
-    title: 'Should we introduce a new character?',
-    options: ['Yes', 'No'],
-    stakedAmount: 75,
-  },
-];
+import { Debate } from '@/types';
 
 interface DebateListProps {
   debates: Debate[];

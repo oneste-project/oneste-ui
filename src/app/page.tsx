@@ -8,13 +8,7 @@ import { ConnectWallet } from '@/components/ConnectWallet';
 import { DebateList } from '@/components/DebateList';
 import { RewardDisplay } from '@/components/RewardDisplay';
 import { CreateDebate } from '@/components/CreateDebate';
-
-interface Debate {
-  id: number;
-  title: string;
-  options: string[];
-  stakedAmount: number;
-}
+import { Debate } from '@/types';
 
 const initialMockDebates: Debate[] = [
   {

@@ -21,8 +21,8 @@ export function VoteConfirmationCard({ debateTitle, votedOption, onClose }: Vote
         </button>
         <h2 className="text-3xl font-bold text-green-400 mb-4">Vote Confirmed!</h2>
         <p className="text-xl text-gray-200 mb-2">You have successfully cast your vote.</p>
-        <p className="text-lg text-gray-300 mb-1">Debate: <span className="font-semibold text-white">"{debateTitle}"</span></p>
-        <p className="text-lg text-gray-300 mb-6">Your Vote: <span className="font-semibold text-blue-400">"{votedOption}"</span></p>
+        <p className="text-lg text-gray-300 mb-1">Debate: <span className="font-semibold text-white">&quot;{debateTitle}&quot;</span></p>
+        <p className="text-lg text-gray-300 mb-6">Your Vote: <span className="font-semibold text-blue-400">&quot;{votedOption}&quot;</span></p>
         <button
           onClick={onClose}
           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50"

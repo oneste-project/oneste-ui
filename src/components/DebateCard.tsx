@@ -5,6 +5,7 @@ import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
 import { toast } from 'react-toastify';
 import { VoteConfirmationCard } from './VoteConfirmationCard';
+import { Debate } from '@/types';
 
 // Placeholder for your deployed smart contract address
 const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
@@ -44,13 +45,6 @@ const contractAbi = [
   }
 ];
 
-interface Debate {
-  id: number;
-  title: string;
-  options: string[];
-  stakedAmount: number;
-}
-
 interface DebateCardProps {
   debate: Debate;
 }
@@ -72,7 +66,7 @@ export function DebateCard({ debate }: DebateCardProps) {
       hash: stakeHash,
     });
 
-  const { isLoading: isConfirmingVote, isSuccess: isConfirmedVote } = 
+  const { isSuccess: isConfirmedVote } = 
     useWaitForTransactionReceipt({
       hash: voteHash,
     });
@@ -89,9 +83,9 @@ export function DebateCard({ debate }: DebateCardProps) {
     if (isConfirmedStake) {
       toast.success('Stake transaction confirmed! 🎉');
     } else if (stakeError) {
-      toast.error(`Stake Error: ${stakeError.shortMessage || stakeError.message} ❌`);
+      toast.error(`Stake Error: ${(stakeError as any)?.shortMessage || (stakeError as any).message} ❌`); // eslint-disable-line @typescript-eslint/no-explicit-any
     }
-  }, [isStaking, isConfirmedStake, stakeError]);
+  }, [isStaking, isConfirmedStake, stakeError, stakeToastId]);
 
   useEffect(() => {
     if (isVoting) {
@@ -108,9 +102,9 @@ export function DebateCard({ debate }: DebateCardProps) {
       setUserVotedOptionIndex(votingOptionIndex); // Store the voted option index
       setShowVoteConfirmation(true); // Show the confirmation card
     } else if (voteError) {
-      toast.error(`Vote Error: ${voteError.shortMessage || voteError.message} 🛑`);
+      toast.error(`Vote Error: ${(voteError as any)?.shortMessage || (voteError as any).message} 🛑`); // eslint-disable-line @typescript-eslint/no-explicit-any
     }
-  }, [isVoting, isConfirmedVote, voteError]);
+  }, [isVoting, isConfirmedVote, voteError, voteToastId, votingOptionIndex]);
 
   const handleStakeAmountChange = (amount: string) => {
     setStakeAmount(parseFloat(amount) || 0);

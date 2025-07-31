@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
 import { toast } from 'react-toastify';
+import { Debate } from '@/types';
 
 // Placeholder for your deployed smart contract address
 const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
@@ -65,10 +66,10 @@ export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: De
     if (isConfirmed) {
       toast.success('Debate created successfully! 🎉');
       // Save debate details to local storage
-      const newDebate = {
-        id: currentDebateId, // Use the generated debateId from state
+      const newDebate: Debate = {
+        id: currentDebateId as number, // Assert currentDebateId as number
         title: title,
-        options: currentOptionsArray, // Use the processed options array from state
+        options: currentOptionsArray,
         stakedAmount: 0, // Initial staked amount is 0
       };
       const existingDebates = JSON.parse(localStorage.getItem('createdDebates') || '[]');
@@ -83,7 +84,7 @@ export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: De
       setCurrentOptionsArray([]); // Clear the currentOptionsArray after use
     } else if (error) {
       console.error("Error creating debate:", error);
-      toast.error(`Error creating debate: ${error.shortMessage || error.message} ❌`);
+      toast.error(`Error creating debate: ${(error as any)?.shortMessage || (error as any).message} ❌`); // eslint-disable-line @typescript-eslint/no-explicit-any
     }
 
     return () => {
@@ -91,7 +92,7 @@ export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: De
         toast.dismiss(toastId);
       }
     };
-  }, [isPending, isConfirmed, error, hash]);
+  }, [isPending, isConfirmed, error, hash, currentDebateId, currentOptionsArray, onDebateCreated, title]);
 
   const handleCreateDebate = () => {
     if (!title || !options || rewardPool <= 0 || minVoteAmount < 0) {
@@ -114,7 +115,7 @@ export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: De
     const proposalIds = optionsArray.map((_, index) => BigInt(index + 1)); // Start from 1 to avoid 0
 
     // Ensure the value sent is at least the platform fee
-    const valueToSend = 0n; // Temporarily set to 0 for testing without XTZ
+    const valueToSend = parseEther('0'); // Temporarily set to 0 for testing without XTZ
     // if (valueToSend < parseEther(platformFee.toString())) {
     //   toast.error(`Reward pool must be at least ${platformFee} XTZ to cover platform fee. 🛑`);
     //   return;
