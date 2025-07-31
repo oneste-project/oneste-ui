@@ -9,6 +9,7 @@ import { Debate } from '@/types';
 
 // Placeholder for your deployed smart contract address
 const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
+console.log('DebateCard: contractAddress', contractAddress);
 
 // Placeholder for your smart contract ABI (simplified for staking function)
 const contractAbi = [
