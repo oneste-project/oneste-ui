@@ -13,6 +13,8 @@ const etherlinkTestnet = {
   blockExplorers: { default: { name: 'Etherlink Explorer', url: 'https://explorer.etherlink.com' } },
 } as const;
 
+console.log('WagmiConfigProvider: Configured Chain ID', etherlinkTestnet.id);
+
 const queryClient = new QueryClient();
 
 export function WagmiConfigProvider({ children }: { children: ReactNode }) {

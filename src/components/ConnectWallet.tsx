@@ -6,6 +6,7 @@ export function ConnectWallet() {
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAccount();
+  console.log('ConnectWallet: Address', address, 'isConnected', isConnected);
   const { data: balance } = useBalance({ address });
 
   const handleConnect = () => {

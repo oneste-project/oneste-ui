@@ -2,6 +2,7 @@
 .next/
 .env.local
 node_modules/
+oneste-voting-contract/
 
 # Documentation and logs
 DETAILED_SPEC.md
@@ -9,4 +10,5 @@ DEVELOPMENT_LOG.md
 readme-spec.md
 oneste-smart-contract.md
 votingContract.md
-oneste-voting-contract/
+app-brief.md
+spec.md
