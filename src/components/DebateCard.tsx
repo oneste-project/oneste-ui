@@ -180,6 +180,7 @@ export function DebateCard({ debate }: DebateCardProps) {
     <div key={debate.id} className="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl shadow-3xl border border-gray-700 transform hover:scale-105 hover:border-blue-500 hover:shadow-blue-500/50 transition-all duration-300">
       <h3 className="text-2xl sm:text-3xl font-semibold mb-2 sm:mb-4 text-blue-300">{debate.title}</h3>
       <p className="text-gray-300 mb-3 text-sm sm:text-base" data-tooltip-id="gamelike-tooltip" data-tooltip-content="The total amount of Tezos (XTZ) currently staked on this debate.">Staked: {debate.stakedAmount} XTZ</p>
+      <p className="text-gray-300 mb-3 text-sm sm:text-base" data-tooltip-id="gamelike-tooltip" data-tooltip-content="The total reward pool for this debate.">Reward Pool: {debate.rewardPool} XTZ</p>
       <p className="text-gray-400 mb-4 text-xs sm:text-sm">Time Remaining: {formatTime(timeRemaining)}</p>
       <div className="flex flex-col space-y-2 sm:space-y-3">
         {debate.options.map((voteOption, index) => (

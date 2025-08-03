@@ -25,6 +25,11 @@ const contractAbi = [
       },
       {
         "internalType": "uint256",
+        "name": "end_time",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
         "name": "minVoteAmount",
         "type": "uint256"
       }
@@ -64,14 +69,15 @@ export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: Om
       toastId = null;
     }
 
-    if (isConfirmed) {
+    if (isConfirmed && currentDebateId) {
       toast.success('Debate created successfully! 🎉');
       // Save debate details to local storage
-      const newDebate: Debate = {
+      const newDebate: Omit<Debate, 'endTime'> = {
         id: currentDebateId as number, // Assert currentDebateId as number
         title: title,
         options: currentOptionsArray,
         stakedAmount: 0, // Initial staked amount is 0
+        rewardPool: rewardPool,
       };
       const existingDebates = JSON.parse(localStorage.getItem('createdDebates') || '[]');
       existingDebates.push(newDebate);
@@ -93,7 +99,7 @@ export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: Om
         toast.dismiss(toastId);
       }
     };
-  }, [isPending, isConfirmed, error, hash, currentDebateId, currentOptionsArray, onDebateCreated, title]);
+  }, [isPending, isConfirmed, error, hash, currentDebateId, currentOptionsArray, onDebateCreated, title, endTime, rewardPool]);
 
   const handleCreateDebate = () => {
     if (!title || !options || rewardPool <= 0 || minVoteAmount < 0) {
@@ -127,7 +133,7 @@ export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: Om
         address: contractAddress,
         abi: contractAbi,
         functionName: 'createDebate',
-        args: [BigInt(debateId), proposalIds, parseEther(minVoteAmount.toString())],
+        args: [BigInt(debateId), proposalIds, BigInt(Date.now() + endTime * 24 * 60 * 60 * 1000), parseEther(minVoteAmount.toString())],
         value: valueToSend,
       });
     } catch (err) {

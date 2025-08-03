@@ -16,13 +16,15 @@ const initialMockDebates: Debate[] = [
     title: 'Crypto vs Fiat',
     options: ['Crypto', 'Fiat'],
     stakedAmount: 100,
+    rewardPool: 150,
     endTime: Date.now() + (1000 * 60 * 60 * 24 * 3), // Ends in 3 days
   },
   {
     id: 2,
-    title: 'Should we introduce a new character?',
-    options: ['Yes', 'No'],
+    title: 'Privacy is dead',
+    options: ['Get over it', 'Privacy is human'],
     stakedAmount: 75,
+    rewardPool: 100,
     endTime: Date.now() + (1000 * 60 * 60 * 48), // Ends in 48 hours
   },
 ];
