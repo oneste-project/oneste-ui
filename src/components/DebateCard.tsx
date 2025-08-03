@@ -9,7 +9,6 @@ import { Debate } from '@/types';
 
 // Placeholder for your deployed smart contract address
 const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
-console.log('DebateCard: contractAddress', contractAddress);
 
 // Placeholder for your smart contract ABI (simplified for staking function)
 const contractAbi = [
@@ -50,12 +49,39 @@ interface DebateCardProps {
   debate: Debate;
 }
 
+// Function to format time remaining (moved outside component)
+const formatTime = (ms: number) => {
+  if (ms <= 0) return 'Debate Ended';
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minutes = Math.floor((ms / (1000 * 60)) % 60);
+  const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+  const parts = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (seconds > 0 && days === 0 && hours === 0 && minutes === 0) parts.push(`${seconds}s`);
+
+  return parts.join(' ') || 'Debate Ended';
+};
+
 export function DebateCard({ debate }: DebateCardProps) {
   const [stakeAmount, setStakeAmount] = useState<number>(0);
   const [votingOptionIndex, setVotingOptionIndex] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState<boolean>(false); // New state for voting indication
   const [userVotedOptionIndex, setUserVotedOptionIndex] = useState<number | null>(null);
   const [showVoteConfirmation, setShowVoteConfirmation] = useState<boolean>(false);
+  const [timeRemaining, setTimeRemaining] = useState<number>(debate.endTime - Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const remaining = debate.endTime - Date.now();
+      setTimeRemaining(remaining > 0 ? remaining : 0);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [debate.endTime]);
 
   const { writeContract: writeStake, data: stakeHash, isPending: isStaking, error: stakeError } = useWriteContract();
   const { writeContract: writeVote, data: voteHash, isPending: isVoting, error: voteError } = useWriteContract();
@@ -87,8 +113,6 @@ export function DebateCard({ debate }: DebateCardProps) {
   useEffect(() => {
     if (isConfirmedStake) {
       toast.success('Stake transaction confirmed! 🎉');
-    } else if (stakeError) {
-      toast.error(`Stake Error: ${(stakeError as Error & { shortMessage?: string })?.shortMessage || stakeError.message} ❌`);
     }
   }, [isConfirmedStake, stakeError]);
 
@@ -156,6 +180,7 @@ export function DebateCard({ debate }: DebateCardProps) {
     <div key={debate.id} className="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl shadow-3xl border border-gray-700 transform hover:scale-105 hover:border-blue-500 hover:shadow-blue-500/50 transition-all duration-300">
       <h3 className="text-2xl sm:text-3xl font-semibold mb-2 sm:mb-4 text-blue-300">{debate.title}</h3>
       <p className="text-gray-300 mb-3 text-sm sm:text-base" data-tooltip-id="gamelike-tooltip" data-tooltip-content="The total amount of Tezos (XTZ) currently staked on this debate.">Staked: {debate.stakedAmount} XTZ</p>
+      <p className="text-gray-400 mb-4 text-xs sm:text-sm">Time Remaining: {formatTime(timeRemaining)}</p>
       <div className="flex flex-col space-y-2 sm:space-y-3">
         {debate.options.map((voteOption, index) => (
           <button key={index} 
@@ -202,6 +227,6 @@ export function DebateCard({ debate }: DebateCardProps) {
           {(isStaking || isConfirmingStake) ? 'Staking...' : 'Stake'}
         </button>
       </div>
-      </div>
+    </div>
   );
 }

@@ -13,17 +13,21 @@ import { Debate } from '@/types';
 const initialMockDebates: Debate[] = [
   {
     id: 1,
-    title: 'Should we add a new map?',
-    options: ['Yes', 'No'],
+    title: 'Crypto vs Fiat',
+    options: ['Crypto', 'Fiat'],
     stakedAmount: 100,
+    endTime: Date.now() + (1000 * 60 * 60 * 24 * 3), // Ends in 3 days
   },
   {
     id: 2,
     title: 'Should we introduce a new character?',
     options: ['Yes', 'No'],
     stakedAmount: 75,
+    endTime: Date.now() + (1000 * 60 * 60 * 48), // Ends in 48 hours
   },
 ];
+
+console.log('page.tsx: initialMockDebates', initialMockDebates);
 
 export default function Home() {
   const [init, setInit] = useState(false);
@@ -32,14 +36,20 @@ export default function Home() {
   // Load debates from local storage on initial mount
   useEffect(() => {
     const storedDebates = JSON.parse(localStorage.getItem('createdDebates') || '[]');
+    console.log('page.tsx: storedDebates', storedDebates);
     setDebates([...initialMockDebates, ...storedDebates]);
+    console.log('page.tsx: debates after setting', debates);
   }, []);
 
   // Callback to add a new debate and update local storage
-  const handleDebateCreated = useCallback((newDebate: Debate) => {
+  const handleDebateCreated = useCallback((newDebate: Omit<Debate, 'endTime'>, endTime: number) => {
+    const debateWithEndTime: Debate = {
+      ...newDebate,
+      endTime: Date.now() + (1000 * 60 * 60 * 24 * endTime),
+    };
     setDebates((prevDebates) => {
-      const updatedDebates = [...prevDebates, newDebate];
-      localStorage.setItem('createdDebates', JSON.stringify(updatedDebates.filter(d => d.id > 1000000000000))); // Only store dynamically created debates
+      const updatedDebates = [...prevDebates, debateWithEndTime];
+      localStorage.setItem('createdDebates', JSON.stringify(updatedDebates.filter(d => d.id > 1000000000000)));
       return updatedDebates;
     });
   }, []);

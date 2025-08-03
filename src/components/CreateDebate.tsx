@@ -36,11 +36,12 @@ const contractAbi = [
   }
 ];
 
-export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: Debate) => void }) {
+export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: Omit<Debate, 'endTime'>, endTime: number) => void }) {
   const [title, setTitle] = useState('');
   const [options, setOptions] = useState(''); // Comma-separated options
   const [rewardPool, setRewardPool] = useState<number>(0); // This will be the value sent with the transaction
   const [minVoteAmount, setMinVoteAmount] = useState<number>(0); // New state for minVoteAmount
+  const [endTime, setEndTime] = useState<number>(1); // New state for end time in days
   const [currentDebateId, setCurrentDebateId] = useState<number | null>(null); // New state to store the generated debateId
   const [currentOptionsArray, setCurrentOptionsArray] = useState<string[]>([]); // New state to store the processed options array
   const platformFee = 0.1; // 0.1 XTZ platform fee
@@ -75,7 +76,7 @@ export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: De
       const existingDebates = JSON.parse(localStorage.getItem('createdDebates') || '[]');
       existingDebates.push(newDebate);
       localStorage.setItem('createdDebates', JSON.stringify(existingDebates));
-      onDebateCreated(newDebate); // Notify parent component
+      onDebateCreated(newDebate, endTime); // Notify parent component
 
       setTitle('');
       setOptions('');
@@ -186,6 +187,18 @@ export function CreateDebate({ onDebateCreated }: { onDebateCreated: (debate: De
             placeholder="e.g., 0.1"
           />
           <p className="text-sm text-gray-400 mt-2">Minimum amount required to vote in this debate.</p>
+        </div>
+        <div className="mb-6">
+          <label htmlFor="endTime" className="block text-gray-300 text-lg font-semibold mb-2">End Time (days)</label>
+          <input
+            type="number"
+            id="endTime"
+            value={endTime || ''}
+            onChange={(e) => setEndTime(parseInt(e.target.value) || 0)}
+            className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., 1"
+          />
+          <p className="text-sm text-gray-400 mt-2">The debate will end in the specified number of days.</p>
         </div>
         <button
           onClick={handleCreateDebate}
